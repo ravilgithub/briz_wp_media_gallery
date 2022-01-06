@@ -1,11 +1,12 @@
 <?php
 namespace Briz_Images_gallery;
+use Briz_Shortcodes\common\Helper;
 
 /**
  * 
  * */
 class Images_gallery {
-	protected $assets_id = 'briz_images_gallery';
+	protected $id_prefix = 'briz_images_gallery';
 
 
 	/**
@@ -13,10 +14,10 @@ class Images_gallery {
 	 * */
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'add_custom_box' ] );
+		add_action( 'save_post', [ $this, 'meta_box_save' ], 10, 2 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'add_assets' ] );
 		add_filter( 'script_loader_tag', [ $this, 'set_module_attr' ], 10, 3 );
 	}
-
 
 
 	/**
@@ -34,8 +35,8 @@ class Images_gallery {
 			'css' => [
 				/************ CSS ************/
 				[
-					'id'   => $this->assets_id,
-					'src'  => PLUGIN_URL . 'assets/css/' . $this->assets_id . '.min.css',
+					'id'   => $this->id_prefix,
+					'src'  => PLUGIN_URL . 'assets/css/' . $this->id_prefix . '.min.css',
 					'deps' => [],
 					'ver'  => '1.0.0'
 				]
@@ -43,8 +44,8 @@ class Images_gallery {
 			'js' => [
 				/************ SCRIPTS ************/
 				[
-					'id'   => $this->assets_id,
-					'src'  => PLUGIN_URL . 'assets/js/' . $this->assets_id . '.js',
+					'id'   => $this->id_prefix,
+					'src'  => PLUGIN_URL . 'assets/js/' . $this->id_prefix . '.js',
 					'deps' => [ 'jquery' ],
 					'ver'  => '1.0.0',
 					'in_footer' => true
@@ -52,7 +53,7 @@ class Images_gallery {
 			]
 		];
 
-		$assets = apply_filters( "{$this->assets_id}_assets", $assets );
+		$assets = apply_filters( "{$this->id_prefix}_assets", $assets );
 		$this->join_assets( $assets, false );
 	}
 
@@ -144,7 +145,7 @@ class Images_gallery {
 	 * @author Ravil
 	 * */
 	public function set_module_attr( $tag, $handle, $src ) {
-		$module_handle = $this->assets_id;
+		$module_handle = $this->id_prefix;
 		if ( $module_handle === $handle )
 			$tag = '<script type="module" src="' . $src . '" id="' . $module_handle . '-js"></script>';
 		return $tag;
@@ -155,7 +156,46 @@ class Images_gallery {
 	 * 
 	 * */
 	public function add_custom_box() {
-		add_meta_box( 'briz_images_gallery', 'images gallery', [ $this, 'meta_box_callback' ], [ 'post', 'page' ], 'side', 'low', null );
+		add_meta_box( $this->id_prefix, 'images gallery', [ $this, 'meta_box_callback' ], [ 'post', 'page' ], 'side', 'high', null );
+	}
+
+
+	/**
+	 * Saving, changing or deleting the values of the meta fields of the posts.
+	 *
+	 * Сохранение, изменение или удаление значений мета полей записи.
+	 *
+	 * @param String $post_id - ID записи, которая обновляется.
+	 * @param Object $post - Объект записи: объект WP_Post.
+	 *
+	 * @return void
+	 *
+	 * @since 0.0.1
+	 * @author Ravil
+	 */
+	public function meta_box_save( $post_id, $post ) {
+		// Helper::debug( $_POST );
+		/*if ( ! isset( $_POST[ $this->id_prefix ] ) )
+			return;
+
+		foreach ( $_POST[ $this->id_prefix ] as $key => $val ) {
+			if ( ! $val && $val !== '0' ) {
+				delete_post_meta( $post_id, $key );
+			} else {
+				update_post_meta( $post_id, $key, $val );
+			}
+		}*/
+
+		if ( ! isset( $_POST[ '_' . $this->id_prefix ] ) )
+			return;
+
+		$val = $_POST[ '_' . $this->id_prefix ];
+
+		if ( ! $val && $val !== '0' ) {
+			delete_post_meta( $post_id, '_' . $this->id_prefix );
+		} else {
+			update_post_meta( $post_id, '_' . $this->id_prefix, $val );
+		}
 	}
 
 
@@ -178,6 +218,8 @@ class Images_gallery {
 		extract( $opts );*/
 
 		extract( $defaults );
+		$value = get_post_meta( $post->ID, '_' . $this->id_prefix, true );
+		// Helper::debug( $value );
 
 		$stage = 'addidable';
 		$add_action_txt = __( 'Add медиафайлы' );
@@ -218,6 +260,7 @@ class Images_gallery {
 			<figure>
 				<span class="briz-images-gallery-media-place">
 <?php
+
 					if ( $value && '[]' !== $value ) :
 						$v = json_decode( $value );
 						if ( ! empty( $v ) ) :
@@ -271,7 +314,7 @@ class Images_gallery {
 
 			<input
 				type="hidden"
-				name="<?php echo esc_attr( $key ); ?>"
+				name="_<?php echo esc_attr( $this->id_prefix ); ?>"
 				value="<?php echo esc_attr( $value ); ?>"
 			/>
 		</div>
