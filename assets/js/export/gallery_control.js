@@ -14,7 +14,7 @@ export default {
 			del: '.briz-images-gallery-del-media-btn'
 		},
 		mediaPlace: '.briz-images-gallery-media-place',
-		input: 'input[type=hidden]',
+		input: '.briz-images-gallery-media-collection',
 		activeClass: 'briz-images-gallery-del-media-btn-active',
 	},
 
