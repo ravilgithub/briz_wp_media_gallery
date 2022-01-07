@@ -15,22 +15,40 @@ class Images_gallery {
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'add_custom_box' ] );
 		add_action( 'save_post', [ $this, 'meta_box_save' ], 10, 2 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'add_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'join_assets' ] );
 		add_filter( 'script_loader_tag', [ $this, 'set_module_attr' ], 10, 3 );
 	}
 
 
 	/**
-	 * Add CSS and JS.
+	 * Set CSS and JS.
 	 *
 	 * Добавление стилей и скриптов.
+	 *
+	 * @var Array $assets {
+	 *  @type Array $css {
+	 *   @type String $id   - id стилей.
+	 *   @type String $src  - URL файла стилей.
+	 *   @type Array $deps  - другие стили от которых зависит.
+	 *                        правильная работа текущего файла стилей.
+	 *   @type String $ver  - версия регистрируемого файла стилей( не обязательно ).
+	 *  }
+	 *  @type Array $js {
+	 *   @type String $id   - id скрипта.
+	 *   @type String $src  - URL файла.
+	 *   @type Array $deps  - другие скрипты от которых зависит.
+	 *                        правильная работа текущего скрипта.
+	 *   @type String $ver  - версия регистрируемого скрипта( не обязательно ).
+	 *   @type Boolean $in_footer - где выводить скрипт: в head или footer.
+	 *  }
+	 * }
 	 *
 	 * @return void.
 	 *
 	 * @since 0.0.1
 	 * @author Ravil
 	 */
-	public function add_assets() {
+	public function set_assets() {
 		$assets = [
 			'css' => [
 				/************ CSS ************/
@@ -53,71 +71,33 @@ class Images_gallery {
 			]
 		];
 
-		$assets = apply_filters( "{$this->id_prefix}_assets", $assets );
-		$this->join_assets( $assets, false );
+		return apply_filters( "{$this->id_prefix}_assets", $assets );
 	}
 
 
 	/**
-	 * Registration or enqueue of styles and scripts.
+	 * Enqueue of styles and scripts.
 	 *
-	 * Регистрация или подключение стилей и скриптов.
-	 *
-	 * @param Array $assets {
-	 *  @type Array $css {
-	 *   @type String $id   - id стилей.
-	 *   @type String $src  - URL файла стилей.
-	 *   @type Array $deps  - другие стили от которых зависит.
-	 *                        правильная работа текущего файла стилей.
-	 *   @type String $ver  - версия регистрируемого файла стилей( не обязательно ).
-	 *  }
-	 *  @type Array $js {
-	 *   @type String $id   - id скрипта.
-	 *   @type String $src  - URL файла.
-	 *   @type Array $deps  - другие скрипты от которых зависит.
-	 *                        правильная работа текущего скрипта.
-	 *   @type String $ver  - версия регистрируемого скрипта( не обязательно ).
-	 *   @type Boolean $in_footer - где выводить скрипт: в head или footer.
-	 *  }
-	 * }
-	 *
-	 * @param String $register - определяет какое действие совершать,
-	 *                           регистрировать или подключать 'CSS' и 'JS'.
-	 *                           Available: 'true' or 'false'
-	 *                           Default: 'true'
-	 *
-	 * @see Briz_Shortcodes::merge_shortcode_assets()
-	 *  @link ~/main_class.php
-	 *
-	 * @see Briz_Tax_Shortcode::join_assets()
-	 *  @link ~/inc/shortcode_briz_tax.php
+	 * Подключение стилей и скриптов.
 	 *
 	 * @return void.
 	 *
 	 * @since 0.0.1
 	 * @author Ravil.
 	 */
-	public function join_assets( $assets, $register = true ) {
+	public function join_assets() {
+		$assets = $this->set_assets();
+
 		foreach ( $assets as $type => $data ) {
 			foreach ( $data as $item ) {
 				extract( $item );
 
 				if ( 'css' == $type ) {
-					if ( $register ) {
-						if ( ! wp_style_is( $id, 'registered' ) )
-							wp_register_style( $id, $src, $deps, $ver );
-					} else {
-						if ( ! wp_style_is( $id, 'enqueued' ) )
-							wp_enqueue_style( $id, $src, $deps, $ver );
-					}
+					if ( ! wp_style_is( $id, 'enqueued' ) )
+						wp_enqueue_style( $id, $src, $deps, $ver );
 				} else {
-					if ( $register ) {
-						if ( ! wp_script_is( $id, 'registered' ) )
-							wp_register_script( $id, $src, $deps, $ver, $in_footer );
-					} else {
-						if ( ! wp_script_is( $id, 'enqueued' ) )
-							wp_enqueue_script( $id, $src, $deps, $ver, $in_footer );
-					}
+					if ( ! wp_script_is( $id, 'enqueued' ) )
+						wp_enqueue_script( $id, $src, $deps, $ver, $in_footer );
 				}
 			}
 		}
@@ -146,6 +126,7 @@ class Images_gallery {
 	 * */
 	public function set_module_attr( $tag, $handle, $src ) {
 		$module_handle = $this->id_prefix;
+
 		if ( $module_handle === $handle )
 			$tag = '<script type="module" src="' . $src . '" id="' . $module_handle . '-js"></script>';
 		return $tag;
@@ -174,28 +155,25 @@ class Images_gallery {
 	 * @author Ravil
 	 */
 	public function meta_box_save( $post_id, $post ) {
-		// Helper::debug( $_POST );
-		/*if ( ! isset( $_POST[ $this->id_prefix ] ) )
-			return;
+		if (
+			! isset( $_POST[ 'name_of_nonce_field' ] ) ||
+			! wp_verify_nonce( $_POST[ 'name_of_nonce_field' ], 'name_of_my_action' )
+		) return;
 
-		foreach ( $_POST[ $this->id_prefix ] as $key => $val ) {
-			if ( ! $val && $val !== '0' ) {
-				delete_post_meta( $post_id, $key );
-			} else {
-				update_post_meta( $post_id, $key, $val );
-			}
-		}*/
+		if (
+			! current_user_can( 'edit_post', $post_id ) ||
+			! current_user_can( 'edit_page', $post_id )
+		) return;
 
 		if ( ! isset( $_POST[ '_' . $this->id_prefix ] ) )
 			return;
 
 		$val = $_POST[ '_' . $this->id_prefix ];
 
-		if ( ! $val && $val !== '0' ) {
+		if ( ! $val && $val !== '0' )
 			delete_post_meta( $post_id, '_' . $this->id_prefix );
-		} else {
+		else
 			update_post_meta( $post_id, '_' . $this->id_prefix, $val );
-		}
 	}
 
 
@@ -203,7 +181,6 @@ class Images_gallery {
 	 * 
 	 * */
 	public function meta_box_callback( $post ) {
-		// Helper::debug( $post );
 		$defaults = [
 			'title'    => 'Insert a media',
 			'library'  => [ 'type' => 'image' ],
@@ -219,7 +196,6 @@ class Images_gallery {
 
 		extract( $defaults );
 		$value = get_post_meta( $post->ID, '_' . $this->id_prefix, true );
-		// Helper::debug( $value );
 
 		$stage = 'addidable';
 		$add_action_txt = __( 'Add медиафайлы' );
@@ -260,7 +236,6 @@ class Images_gallery {
 			<figure>
 				<span class="briz-images-gallery-media-place">
 <?php
-
 					if ( $value && '[]' !== $value ) :
 						$v = json_decode( $value );
 						if ( ! empty( $v ) ) :
@@ -311,9 +286,12 @@ class Images_gallery {
 ?>
 				</span> <!-- .briz-images-gallery-media-place -->
 			</figure>
-
+<?php
+			wp_nonce_field( 'name_of_my_action','name_of_nonce_field' );
+?>
 			<input
 				type="hidden"
+				class="briz-images-gallery-media-collection"
 				name="_<?php echo esc_attr( $this->id_prefix ); ?>"
 				value="<?php echo esc_attr( $value ); ?>"
 			/>
