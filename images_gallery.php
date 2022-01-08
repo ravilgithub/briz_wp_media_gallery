@@ -7,12 +7,24 @@ use Briz_Shortcodes\common\Helper;
  * */
 class Images_gallery {
 	protected $id_prefix = 'briz_images_gallery';
+	protected $media_props = [
+		'title'    => 'Insert a media',
+		'library'  => [ 'type' => 'image' ],
+		/*'library': {
+			'type': [ 'video', 'image' ]
+		},*/
+		'multiple' => true,
+		'button'   => [ 'text' => 'Insert' ]
+	];
 
 
 	/**
 	 * 
 	 * */
-	public function __construct() {
+	public function __construct( $media_props ) {
+		if ( ! empty( $media_props ) )
+			$this->media_props = wp_parse_args( $media_props, $this->media_props );
+
 		add_action( 'add_meta_boxes', [ $this, 'add_custom_box' ] );
 		add_action( 'save_post', [ $this, 'meta_box_save' ], 10, 2 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'join_assets' ] );
@@ -181,20 +193,7 @@ class Images_gallery {
 	 * 
 	 * */
 	public function meta_box_callback( $post ) {
-		$defaults = [
-			'title'    => 'Insert a media',
-			'library'  => [ 'type' => 'image' ],
-			/*'library': {
-				'type': [ 'video', 'image' ]
-			},*/
-			'multiple' => true,
-			'button'   => [ 'text' => 'Insert' ]
-		];
-
-		/*$opts = wp_parse_args( $params[ 'options' ], $defaults );
-		extract( $opts );*/
-
-		extract( $defaults );
+		extract( $this->media_props );
 		$value = get_post_meta( $post->ID, '_' . $this->id_prefix, true );
 
 		$stage = 'addidable';
@@ -215,7 +214,7 @@ class Images_gallery {
 					type="button"
 					class="button briz-images-gallery-add-media-btn"
 					data-title="<?php echo esc_attr( $title ); ?>"
-					data-library-type="<?php echo esc_attr( $library[ 'type' ] ); ?>"
+					data-library-type="<?php echo esc_attr( json_encode( $library[ 'type' ] ) ); ?>"
 					data-multiple="<?php echo esc_attr( $multiple ); ?>"
 					data-button-text="<?php echo esc_attr( $button[ 'text' ] ); ?>"
 					data-action-text="<?php echo esc_attr( $edit_action_txt ); ?>"
@@ -245,26 +244,31 @@ class Images_gallery {
 <?php
 									$details = wp_prepare_attachment_for_js( $media_id );
 									$src = $details[ 'url' ];
+									$type = $details[ 'type' ];
 
 									if ( isset( $details[ 'sizes' ][ 'thumbnail' ] ) ) {
 										$src = $details[ 'sizes' ][ 'thumbnail' ][ 'url' ];
 									}
 
 									// Image
-									if ( 'image' == $library[ 'type' ] ) :
+									if ( 'image' == $type ) :
 ?>
 										<img
 											src="<?php echo esc_attr( $src ); ?>"
 											alt="<?php echo esc_attr( $details[ 'alt' ] ); ?>"
 										/>
 <?php
+									endif;
+
 									// Audio
-									elseif ( 'audio' == $library[ 'type' ] ) :
+									if ( 'audio' == $type ) :
 ?>
 										<audio src="<?php echo esc_attr( $src ); ?>" controls></audio>
 <?php
+									endif;
+
 									// Video
-									elseif ( 'video' == $library[ 'type' ] ) :
+									if ( 'video' == $type ) :
 ?>
 										<video src="<?php echo esc_attr( $src ); ?>" controls></video>
 <?php

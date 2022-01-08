@@ -32,7 +32,7 @@ export default {
 			const btn = evt.target,
 			      args = {
 			        title: btn.dataset.title,
-			        library: { type: btn.dataset.libraryType },
+			        library: { type: JSON.parse( btn.dataset.libraryType ) },
 			        multiple: btn.dataset.multiple,
 			        button: { text: btn.dataset.buttonText }
 			      },
