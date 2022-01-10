@@ -197,8 +197,8 @@ class Images_gallery {
 		$value = get_post_meta( $post->ID, '_' . $this->id_prefix, true );
 
 		$stage = 'addidable';
-		$add_action_txt = __( 'Add медиафайлы' );
-		$edit_action_txt = __( 'Edit медиафайлы' );
+		$add_action_txt = __( 'Add' );
+		$edit_action_txt = __( 'Edit' );
 		$btn_action_txt = $add_action_txt;
 		$delBtnClass = '';
 
@@ -228,68 +228,68 @@ class Images_gallery {
 					class="button briz-images-gallery-del-media-btn <?php echo esc_attr( $delBtnClass ); ?>"
 					data-action-text="<?php echo esc_attr( $add_action_txt ); ?>"
 				>
-					<?php echo __( 'Удалить медиафайлы' ); ?>
+					<?php echo __( 'Delete all' ); ?>
 				</button>
 			</div>
 
-			<figure>
-				<span class="briz-images-gallery-media-place">
+			<div class="briz-images-gallery-media-place">
 <?php
-					if ( $value && '[]' !== $value ) :
-						$v = json_decode( $value );
-						if ( ! empty( $v ) ) :
-							foreach ( $v as $media_id ) :
-?>
-								<span class="briz-images-gallery-media-place-item">
-<?php
-									$details = wp_prepare_attachment_for_js( $media_id );
-									$src = $details[ 'url' ];
-									$type = $details[ 'type' ];
+				if ( $value && '[]' !== $value ) :
+					$v = json_decode( $value );
+					if ( ! empty( $v ) ) :
+						foreach ( $v as $media_id ) :
+							$details = wp_prepare_attachment_for_js( $media_id );
+							$src = $details[ 'url' ];
+							$type = $details[ 'type' ];
 
-									if ( isset( $details[ 'sizes' ][ 'thumbnail' ] ) ) {
-										$src = $details[ 'sizes' ][ 'thumbnail' ][ 'url' ];
-									}
+							if ( isset( $details[ 'sizes' ][ 'thumbnail' ] ) ) {
+								$src = $details[ 'sizes' ][ 'thumbnail' ][ 'url' ];
+							}
+?>
+							<figure
+								class="briz-images-gallery-media-place-item <?php echo esc_attr( $type ); ?>"
+								data-media-id="<?php echo esc_attr( $media_id ); ?>"
+							>
+<?php
+								// Image
+								if ( 'image' == $type ) :
+?>
+									<img
+										src="<?php echo esc_attr( $src ); ?>"
+										alt="<?php echo esc_attr( $details[ 'alt' ] ); ?>"
+									/>
+<?php
+								endif;
 
-									// Image
-									if ( 'image' == $type ) :
+								// Audio
+								if ( 'audio' == $type ) :
 ?>
-										<img
-											src="<?php echo esc_attr( $src ); ?>"
-											alt="<?php echo esc_attr( $details[ 'alt' ] ); ?>"
-										/>
+									<audio src="<?php echo esc_attr( $src ); ?>" controls></audio>
 <?php
-									endif;
+								endif;
 
-									// Audio
-									if ( 'audio' == $type ) :
+								// Video
+								if ( 'video' == $type ) :
 ?>
-										<audio src="<?php echo esc_attr( $src ); ?>" controls></audio>
+									<video src="<?php echo esc_attr( $src ); ?>" controls></video>
 <?php
-									endif;
+								endif;
 
-									// Video
-									if ( 'video' == $type ) :
+								// if ( $caption = $details[ 'caption' ] ) :
 ?>
-										<video src="<?php echo esc_attr( $src ); ?>" controls></video>
+									<!-- <figcaption> -->
+										<?php // echo $caption; ?>
+									<!-- </figcaption> -->
 <?php
-									endif;
-
-									// if ( $caption = $details[ 'caption' ] ) :
+								// endif;
 ?>
-										<!-- <figcaption> -->
-											<?php // echo $caption; ?>
-										<!-- </figcaption> -->
+							</figure> <!-- .briz-images-gallery-media-place-item -->
 <?php
-									// endif;
-?>
-								</span> <!-- .briz-images-gallery-media-place-item -->
-<?php
-							endforeach;
-						endif;
+						endforeach;
 					endif;
+				endif;
 ?>
-				</span> <!-- .briz-images-gallery-media-place -->
-			</figure>
+			</div> <!-- .briz-images-gallery-media-place -->
 <?php
 			wp_nonce_field( 'name_of_my_action','name_of_nonce_field' );
 ?>
