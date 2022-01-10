@@ -21,16 +21,20 @@ define( __NAMESPACE__ . '\PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 require_once( PLUGIN_PATH . '/images_gallery.php' );
 
 function briz_images_gallery_init() {
-  $media_props = [
-    // 'title'    => 'Insert a media',
-    'library'  => [ 'type' => [ 'image', 'audio', 'video' ] ],
-    /*'library': {
-      'type': [ 'video', 'image' ]
-    },*/
-    // 'multiple' => true,
-    // 'button'   => [ 'text' => 'Insert' ]
-  ];
+	$media_props = [
+		// 'title'    => 'Insert a media',
+		'library'  => [
+			'type' => [
+				'image',
+				'audio',
+				'video'
+			]
+		],
+		// 'library' => [ 'type' => 'image' ],
+		// 'multiple' => true,
+		// 'button'   => [ 'text' => 'Insert' ]
+	];
 
-  new Images_gallery( $media_props );
+	new Images_gallery( $media_props );
 }
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\briz_images_gallery_init', 99 );
