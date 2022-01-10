@@ -54,17 +54,20 @@ export default {
 	 * @return String html - разметка медиа файлa и подпись к нему если имеется.
 	 */
 	createEl( wpm, atts ) {
-		const tagName = atts.type;
-		const item = document.createElement( 'span' );
-		item.classList.add( 'briz-media-place-item' );
+		const tagName = atts.type,
+		      item = document.createElement( 'figure' );
+
+		item.classList.add( 'briz-images-gallery-media-place-item', atts.type );
+		item.dataset.mediaId = atts.id;
 
 		let attrs = { src: atts.url }, // для 'audio' и 'video'.
 		    html = '',
 		    media = '';
 
 		if ( 'image' == tagName ) {
+			const img = atts.sizes.thumbnail || atts.sizes.full;
+			attrs[ 'src' ] = img.url;
 			attrs[ 'alt' ] = atts.alt;
-			attrs[ 'src' ] = atts.sizes.thumbnail.url || atts.sizes.full.url;
 		} else if ( 'audio' == tagName ) {
 			attrs[ 'controls' ] = 'controls';
 		} else if ( 'video' == tagName ) {
@@ -178,7 +181,7 @@ export default {
 	 *
 	 * @return {void}
 	 */
-	del( instance ) {
+	delAll( instance ) {
 		instance.querySelector( this.selectors.btn.del ).addEventListener( 'click', () => {
 			this.setMedia( instance, 'del' );
 		}, false );
@@ -225,7 +228,7 @@ export default {
 
 		document.querySelectorAll( wrap ).forEach( instance => {
 			this.add( instance );
-			this.del( instance );
+			this.delAll( instance );
 		} );
 	}
 };
