@@ -78,11 +78,11 @@ export default {
 
 		item.appendChild( media );
 
-		if ( atts.caption ) {
+		/*if ( atts.caption ) {
 			const figcaption = document.createElement( 'figcaption' );
 			figcaption.textContent = atts.caption;
 			item.appendChild( figcaption );
-		}
+		}*/
 
 		return item.outerHTML;
 	},

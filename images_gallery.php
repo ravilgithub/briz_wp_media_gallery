@@ -274,13 +274,13 @@ class Images_gallery {
 <?php
 									endif;
 
-									if ( $caption = $details[ 'caption' ] ) :
+									// if ( $caption = $details[ 'caption' ] ) :
 ?>
-										<figcaption>
-											<?php echo $caption; ?>
-										</figcaption>
+										<!-- <figcaption> -->
+											<?php // echo $caption; ?>
+										<!-- </figcaption> -->
 <?php
-									endif;
+									// endif;
 ?>
 								</span> <!-- .briz-images-gallery-media-place-item -->
 <?php
