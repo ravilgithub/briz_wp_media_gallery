@@ -1,12 +1,21 @@
 <?php
 namespace Briz_Images_gallery;
-use Briz_Shortcodes\common\Helper;
 
 /**
- * 
- * */
+ * The class implements the ability to create a gallery from media files.
+ *
+ * Класс реализует возможность создавать галерею из медиа файлов.
+ *
+ * @property String $id_prefix  - префикс id, JS и CSS файлов.
+ * @property Array $screens     - типы записей к которым допустимо добавлять метаблок.
+ * @property Array $media_props - параметры мета поля по умолчанию.
+ *
+ * @since 0.0.1
+ * @author Ravil
+ */
 class Images_gallery {
 	protected $id_prefix = 'briz_images_gallery';
+	protected $screens = [ 'post', 'page' ];
 	protected $media_props = [
 		'title'    => 'Insert a media',
 		'library'  => [ 'type' => 'image' ],
@@ -19,8 +28,15 @@ class Images_gallery {
 
 
 	/**
-	 * 
-	 * */
+	 * Constructor.
+	 *
+	 * @param Array $media_props - параметры мета поля по умолчанию.
+	 *
+	 * @return void.
+	 *
+	 * @since 0.0.1
+	 * @author Ravil
+	 */
 	public function __construct( $media_props ) {
 		if ( ! empty( $media_props ) )
 			$this->media_props = wp_parse_args( $media_props, $this->media_props );
@@ -146,10 +162,17 @@ class Images_gallery {
 
 
 	/**
-	 * 
-	 * */
+	 * Add an additional block that links media files to a post or page.
+	 *
+	 * Добавляем дополнительный блок, который привязывает медиа файлы к записи или странице.
+	 *
+	 * @return void
+	 *
+	 * @since 0.0.1
+	 * @author Ravil
+	 */
 	public function add_custom_box() {
-		add_meta_box( $this->id_prefix, 'images gallery', [ $this, 'meta_box_callback' ], [ 'post', 'page' ], 'side', 'high', null );
+		add_meta_box( $this->id_prefix, 'images gallery', [ $this, 'meta_box_callback' ], $this->screens, 'side', 'low', null );
 	}
 
 
@@ -190,8 +213,17 @@ class Images_gallery {
 
 
 	/**
-	 * 
-	 * */
+	 * HTML output meta box content.
+	 *
+	 * Вывод HTML содержание метабокса.
+	 *
+	 * @param Object $post - Объект записи: объект WP_Post.
+	 *
+	 * @return void
+	 *
+	 * @since 0.0.1
+	 * @author Ravil
+	 */
 	public function meta_box_callback( $post ) {
 		extract( $this->media_props );
 		$value = get_post_meta( $post->ID, '_' . $this->id_prefix, true );
@@ -250,6 +282,7 @@ class Images_gallery {
 								class="briz-images-gallery-media-place-item <?php echo esc_attr( $type ); ?>"
 								data-media-id="<?php echo esc_attr( $media_id ); ?>"
 							>
+								<i class="briz-image-gallery-del-media-item">×</i>
 <?php
 								// Image
 								if ( 'image' == $type ) :
