@@ -6,45 +6,89 @@ namespace Briz_Images_gallery;
  *
  * Класс реализует возможность создавать галерею из медиа файлов.
  *
- * @property String $id_prefix  - префикс id, JS и CSS файлов.
- * @property Array $screens     - типы записей к которым допустимо добавлять метаблок.
- * @property Array $media_props - параметры мета поля по умолчанию.
+ * @property String lang_domain  - регистрационное "id" файла
+ *                                 переводов для всех шорткодов.
+ * @property String $id_prefix   - префикс id, JS и CSS файлов.
+ * @property Array $screens      - типы записей к которым допустимо добавлять метаблок.
+ * @property Array $media_params - параметры мета поля по умолчанию.
  *
  * @since 0.0.1
  * @author Ravil
  */
 class Images_gallery {
+	protected $lang_domain = 'briz_images_gallery_l10n';
 	protected $id_prefix = 'briz_images_gallery';
 	protected $screens = [ 'post', 'page' ];
-	protected $media_props = [
-		'title'    => 'Insert a media',
-		'library'  => [ 'type' => 'image' ],
-		/*'library': {
-			'type': [ 'video', 'image' ]
-		},*/
-		'multiple' => true,
-		'button'   => [ 'text' => 'Insert' ]
-	];
+	protected $media_params = [];
 
 
 	/**
 	 * Constructor.
 	 *
-	 * @param Array $media_props - параметры мета поля по умолчанию.
+	 * @param Array $media_params - произвольные параметры мета поля.
 	 *
 	 * @return void.
 	 *
 	 * @since 0.0.1
 	 * @author Ravil
 	 */
-	public function __construct( $media_props ) {
-		if ( ! empty( $media_props ) )
-			$this->media_props = wp_parse_args( $media_props, $this->media_props );
+	public function __construct( $media_params ) {
+		$this->set_wp_media_api_params( $media_params );
 
 		add_action( 'add_meta_boxes', [ $this, 'add_custom_box' ] );
 		add_action( 'save_post', [ $this, 'meta_box_save' ], 10, 2 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'join_assets' ] );
 		add_filter( 'script_loader_tag', [ $this, 'set_module_attr' ], 10, 3 );
+		add_action( 'init', array ( $this, 'set_lang_domain' ) );
+	}
+
+
+	/**
+	 * Parameters for WP Media API.
+	 *
+	 * Параметры для WP Media API.
+	 *
+	 * @param Array $media_params - произвольные параметры мета поля.
+	 *
+	 * @return void.
+	 *
+	 * @since 0.0.1
+	 * @author Ravil
+	 */
+	public function set_wp_media_api_params( $media_params ) {
+		$params = [
+			'title'    => 'Add a media',
+			'library'  => [ 'type' => 'image' ],
+			/*'library': {
+				'type': [ 'video', 'image' ]
+			},*/
+			'multiple' => true,
+			'button'   => [ 'text' => 'Insert' ]
+		];
+
+		if ( ! empty( $media_params ) ) {
+			$params = wp_parse_args( $media_params, $params );
+		}
+
+		$this->media_params = apply_filters( $this->id_prefix . '_wp_media_api_params', $params );
+	}
+
+
+	/**
+	 * Register translation file.
+	 *
+	 * Регистрация файла перевода.
+	 *
+	 * @return void
+	 * @since  0.0.1
+	 * @author Ravil
+	 */
+	public function set_lang_domain() {
+		if ( ! is_textdomain_loaded( $this->lang_domain ) ) {
+			$default_path = dirname( __FILE__ ) . '/lang/' . $this->lang_domain . '-ru_RU.mo';
+			$lang_domain_path = apply_filters( $this->id_prefix . '_lang_domain_path', $default_path );
+			load_textdomain( $this->lang_domain, $lang_domain_path );
+		}
 	}
 
 
@@ -172,7 +216,7 @@ class Images_gallery {
 	 * @author Ravil
 	 */
 	public function add_custom_box() {
-		add_meta_box( $this->id_prefix, 'images gallery', [ $this, 'meta_box_callback' ], $this->screens, 'side', 'low', null );
+		add_meta_box( $this->id_prefix, __( 'Media gallery', $this->lang_domain ), [ $this, 'meta_box_callback' ], $this->screens, 'side', 'low', null );
 	}
 
 
@@ -225,12 +269,12 @@ class Images_gallery {
 	 * @author Ravil
 	 */
 	public function meta_box_callback( $post ) {
-		extract( $this->media_props );
+		extract( $this->media_params );
 		$value = get_post_meta( $post->ID, '_' . $this->id_prefix, true );
 
 		$stage = 'addidable';
-		$add_action_txt = __( 'Add' );
-		$edit_action_txt = __( 'Edit' );
+		$add_action_txt = __( 'Add', $this->lang_domain );
+		$edit_action_txt = __( 'Edit', $this->lang_domain );
 		$btn_action_txt = $add_action_txt;
 		$delBtnClass = '';
 
@@ -245,10 +289,10 @@ class Images_gallery {
 				<button
 					type="button"
 					class="button briz-images-gallery-add-media-btn"
-					data-title="<?php echo esc_attr( $title ); ?>"
+					data-title="<?php echo esc_attr( __( $title, $this->lang_domain ) ); ?>"
 					data-library-type="<?php echo esc_attr( json_encode( $library[ 'type' ] ) ); ?>"
 					data-multiple="<?php echo esc_attr( $multiple ); ?>"
-					data-button-text="<?php echo esc_attr( $button[ 'text' ] ); ?>"
+					data-button-text="<?php echo esc_attr( __( $button[ 'text' ], $this->lang_domain ) ); ?>"
 					data-action-text="<?php echo esc_attr( $edit_action_txt ); ?>"
 					data-stage="<?php echo esc_attr( $stage ); ?>"
 				>
@@ -260,7 +304,7 @@ class Images_gallery {
 					class="button briz-images-gallery-del-media-btn <?php echo esc_attr( $delBtnClass ); ?>"
 					data-action-text="<?php echo esc_attr( $add_action_txt ); ?>"
 				>
-					<?php echo __( 'Delete all' ); ?>
+					<?php _e( 'Delete all', $this->lang_domain ); ?>
 				</button>
 			</div>
 
