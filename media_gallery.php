@@ -1,5 +1,5 @@
 <?php
-namespace Briz_Images_gallery;
+namespace Briz_Media_gallery;
 
 /**
  * The class implements the ability to create a gallery from media files.
@@ -15,9 +15,9 @@ namespace Briz_Images_gallery;
  * @since 0.0.1
  * @author Ravil
  */
-class Images_gallery {
-	protected $lang_domain = 'briz_images_gallery_l10n';
-	protected $id_prefix = 'briz_images_gallery';
+class Media_gallery {
+	protected $lang_domain = 'briz_media_gallery_l10n';
+	protected $id_prefix = 'briz_media_gallery';
 	protected $screens = [ 'post', 'page' ];
 	protected $media_params = [];
 
@@ -281,14 +281,14 @@ class Images_gallery {
 		if ( $value && '[]' !== $value ) {
 			$stage = 'editable';
 			$btn_action_txt = $edit_action_txt;
-			$delBtnClass = 'briz-images-gallery-del-media-btn-active';
+			$delBtnClass = 'briz-media-gallery-del-btn-active';
 		}
 ?>
-		<div class="briz-images-gallery-box">
-			<div class="briz-images-gallery-add-controls">
+		<div class="briz-media-gallery-box">
+			<div class="briz-media-gallery-add-controls">
 				<button
 					type="button"
-					class="button briz-images-gallery-add-media-btn"
+					class="button briz-media-gallery-add-btn"
 					data-title="<?php echo esc_attr( __( $title, $this->lang_domain ) ); ?>"
 					data-library-type="<?php echo esc_attr( json_encode( $library[ 'type' ] ) ); ?>"
 					data-multiple="<?php echo esc_attr( $multiple ); ?>"
@@ -301,14 +301,14 @@ class Images_gallery {
 
 				<button
 					type="button"
-					class="button briz-images-gallery-del-media-btn <?php echo esc_attr( $delBtnClass ); ?>"
+					class="button briz-media-gallery-del-btn <?php echo esc_attr( $delBtnClass ); ?>"
 					data-action-text="<?php echo esc_attr( $add_action_txt ); ?>"
 				>
 					<?php _e( 'Delete all', $this->lang_domain ); ?>
 				</button>
 			</div>
 
-			<div class="briz-images-gallery-media-place">
+			<div class="briz-media-gallery-place">
 <?php
 				if ( $value && '[]' !== $value ) :
 					$v = json_decode( $value );
@@ -323,10 +323,10 @@ class Images_gallery {
 							}
 ?>
 							<figure
-								class="briz-images-gallery-media-place-item <?php echo esc_attr( $type ); ?>"
+								class="briz-media-gallery-place-item <?php echo esc_attr( $type ); ?>"
 								data-media-id="<?php echo esc_attr( $media_id ); ?>"
 							>
-								<i class="briz-image-gallery-del-media-item">×</i>
+								<i class="briz-image-gallery-del-item">×</i>
 <?php
 								// Image
 								if ( 'image' == $type ) :
@@ -360,19 +360,19 @@ class Images_gallery {
 <?php
 								// endif;
 ?>
-							</figure> <!-- .briz-images-gallery-media-place-item -->
+							</figure> <!-- .briz-media-gallery-place-item -->
 <?php
 						endforeach;
 					endif;
 				endif;
 ?>
-			</div> <!-- .briz-images-gallery-media-place -->
+			</div> <!-- .briz-media-gallery-place -->
 <?php
 			wp_nonce_field( 'name_of_my_action','name_of_nonce_field' );
 ?>
 			<input
 				type="hidden"
-				class="briz-images-gallery-media-collection"
+				class="briz-media-gallery-collection"
 				name="_<?php echo esc_attr( $this->id_prefix ); ?>"
 				value="<?php echo esc_attr( $value ); ?>"
 			/>

@@ -10,18 +10,18 @@
 export default {
 	selectors: {
 		btn: {
-			add: 'briz-images-gallery-add-media-btn',
+			add: 'briz-media-gallery-add-btn',
 			del: {
-				item: 'briz-image-gallery-del-media-item',
-				all: 'briz-images-gallery-del-media-btn',
+				item: 'briz-image-gallery-del-item',
+				all: 'briz-media-gallery-del-btn',
 			}
 		},
 		media: {
-			place: 'briz-images-gallery-media-place',
-			item: 'briz-images-gallery-media-place-item',
+			place: 'briz-media-gallery-place',
+			item: 'briz-media-gallery-place-item',
 		},
-		input: 'briz-images-gallery-media-collection',
-		activeClass: 'briz-images-gallery-del-media-btn-active',
+		input: 'briz-media-gallery-collection',
+		activeClass: 'briz-media-gallery-del-btn-active',
 	},
 
 

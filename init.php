@@ -1,26 +1,21 @@
 <?php
 /**
- * Plugin Name: BRIZ Images gallery
+ * Plugin Name: BRIZ Media gallery
  * Plugin URI:  http://www.yandex.ru
- * Description: BRIZ Images gallery
+ * Description: BRIZ Media gallery
  * Version:     0.0.1
  * Author:      Ravil
  * Author URI:  http://www.tstudio.zzz.com.ua
  */
 
-/*
- * Text Domain: briz_shortcodes_l10n
- * Domain Path: /lang
- */
-
-namespace Briz_Images_gallery;
+namespace Briz_Media_gallery;
 
 define( __NAMESPACE__ . '\PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( __NAMESPACE__ . '\PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
-require_once( PLUGIN_PATH . '/images_gallery.php' );
+require_once( PLUGIN_PATH . '/media_gallery.php' );
 
-function briz_images_gallery_init() {
+function briz_media_gallery_init() {
 	$media_props = [
 		// 'title'    => 'Insert a media',
 		'library'  => [
@@ -35,6 +30,6 @@ function briz_images_gallery_init() {
 		// 'button'   => [ 'text' => 'Insert' ]
 	];
 
-	new Images_gallery( $media_props );
+	new Media_gallery( $media_props );
 }
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\briz_images_gallery_init', 99 );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\briz_media_gallery_init', 99 );
