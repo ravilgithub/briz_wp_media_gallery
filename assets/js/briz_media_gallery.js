@@ -9,4 +9,4 @@
  */
 
 import galleryControl from './export/gallery_control.js';
-galleryControl.init( '.briz-media-gallery-box' );
+galleryControl.init();
